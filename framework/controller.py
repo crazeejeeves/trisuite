@@ -15,10 +15,11 @@ class SuiteController:
 
         unittest.TestLoader.suiteClass = FilterableTestSuite
 
-        # TODO: Inject TestLoader with custom test suite class for filtering
         for source in data_sources:
             suite = unittest.TestLoader().discover(source, pattern='test_*.py')
             self._suites.append(suite)
+            # TODO: Remove this after testing
+            # break
 
     def get_suites(self):
         for suite in self._suites:
