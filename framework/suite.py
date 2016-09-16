@@ -39,7 +39,6 @@ class FilterableTestSuite(unittest.TestSuite):
                         print(type(method))
                         setattr(test, method_name, _mark_with_skip(method, "Implicitly disabled"))
 
-
                         print(method.__name__) #, tags.product, tags.categories)
 
         super().addTest(test)
