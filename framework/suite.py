@@ -1,22 +1,26 @@
 import unittest
-import functools
+
 from framework.tags import ProductTag
 
 
-def skip_decorator(test_item, reason):
-    if not isinstance(test_item, type):
-        @functools.wraps(test_item)
-        def skip_wrapper(*args, **kwargs):
-            raise SkipTest(reason)
+def _reason(filters):
+    """Generate a parameterized reason message based on the filters that exclude
+    a given method
+    """
+    pass
 
-        test_item = skip_wrapper
-
-    test_item.__unittest_skip__ = True
-    test_item.__unittest_skip_why__ = reason
-    return test_item
+def _mark_with_skip(func, reason):
+    """unittest provides a built-in skip decorator that can be reused for
+    disabled test cases that do not match the filter criteria. It is a
+    parameterized decorator, so dynamic decoration syntax is convoluted
+    """
+    return unittest.skip(reason)(func)
 
 
 class FilterableTestSuite(unittest.TestSuite):
+    """ Pre-processes added test methods and filter items that need to be
+        excluded based on the user-defined inclusion and/or exclusion rules
+    """
 
     def __init__(self, tests=()):
         super().__init__(tests)
@@ -24,22 +28,19 @@ class FilterableTestSuite(unittest.TestSuite):
     def addTest(self, test):
         if isinstance(test, unittest.TestCase):
             test_methods = [func for func in dir(test) if callable(getattr(test, func)) and func.startswith("test_")]
+
             for method_name in test_methods:
                 method = getattr(test, method_name)
                 tags = getattr(method, 'tags', None)
+
                 if tags is not None:
-                    # Abort insertion of test case
+                    # TEST - Abort insertion of test case
                     if tags.product == ProductTag.BME:
-                        #setattr(method, '__unittest_skip__', True)
-                        #setattr(method, '__unittest_skip_why__', 'Disabled by filters')
                         print(type(method))
-                        setattr(test, method_name, skip_decorator(method, "Implicitly disabled"))
+                        setattr(test, method_name, _mark_with_skip(method, "Implicitly disabled"))
 
 
                         print(method.__name__) #, tags.product, tags.categories)
 
         super().addTest(test)
 
-
-    def run(self, result, debug=False):
-        super().run(result, debug)
