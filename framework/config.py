@@ -131,6 +131,8 @@ class CommandLineConfiguration(BaseConfiguration):
                                   )
 
     def _parse(self):
+        self._logger.info('Parsing command-line arguments...')
+
         self._args = self._parser.parse_args()
 
         self._suites = self._args_to_set(self._args.suite)
@@ -141,6 +143,9 @@ class CommandLineConfiguration(BaseConfiguration):
         if self._args.exclude:
             self._categories = self._args_to_set(self._args.exclude)
             self._is_category_excluded = True
-        else:
+        elif self._args.include:
             self._categories = self._args_to_set(self._args.include)
             self._is_category_excluded = False
+
+        self._logger.info('Parse results:\n\n' + str(self) + '\n')
+        self._logger.info('Completed command-line parsing')

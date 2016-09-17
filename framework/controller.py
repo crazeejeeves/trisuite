@@ -3,6 +3,7 @@ import os
 import unittest
 
 from framework.config import BaseConfiguration
+from framework.filters import FilterSystem
 from framework.suite import FilterableTestSuite
 
 
@@ -13,10 +14,11 @@ class TestController:
     _SUITE_FOLDER_SUFFIX = '_tests'
     _TESTCASE_PATTERN = 'test_*.py'
 
-    def __init__(self, config: BaseConfiguration):
+    def __init__(self, config: BaseConfiguration, filters: FilterSystem):
         self._logger = logging.getLogger(__name__)
 
         self._config = config
+        self._filters = filters
         self._suites = []
         self._build_suites()
 
@@ -28,7 +30,7 @@ class TestController:
         # Inject test loader to use our custom suite class that processes the tags
         # The suite instances are created by the loader and prevents us from injecting
         # the configuration hence we inject the global config via the class itself
-        FilterableTestSuite.set_config(self._config)
+        FilterableTestSuite.set_filters(self._filters)
         unittest.TestLoader.suiteClass = FilterableTestSuite
 
         for name, folder in data_sources:

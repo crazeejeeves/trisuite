@@ -9,7 +9,7 @@ class TestComponentB(TestCase):
     def test_one_negative_param(self):
         self.assertRaises(TypeError, lambda: add(-1))
 
-    @tag("Weekly", "Long-runing", product=ProductTag.ACE)
+    @tag("Weekly", "Long-running", product=ProductTag.ACE)
     def test_two_negative_params(self):
         self.assertEquals(-3, add(-1, -2), "Add result did not produce -3")
 
