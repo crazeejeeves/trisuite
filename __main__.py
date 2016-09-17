@@ -1,13 +1,12 @@
 import unittest
 
 import framework
-from framework.config import SuiteConfig
+from framework.config import CommandLineConfiguration as Configuration
 from framework.controller import SuiteController
 
 framework.init_logging()
 
-config = SuiteConfig()
-config.parse()
+config = Configuration()
 
 controller = SuiteController()
 for suite in controller.get_suites():

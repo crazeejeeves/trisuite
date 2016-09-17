@@ -1,17 +1,79 @@
 import argparse
 import logging
+from framework.tags import ProductTag
 
 
-class SuiteConfig:
+class BaseConfiguration:
+    """Base class for defining framework configuration. Provides standard interface to obtain
+    all supported, configurable parameters
 
+    Note to inheritors: Ensure the data types are respected when assigning the values to the
+    internal variables
+    """
     def __init__(self):
         self._logger = logging.getLogger(__name__)
+        self._suites = ()
+        self._categories = ()
+        self._is_category_excluded = True
+        self._priority = -1
+        self._product = None
+        self._skip_shared = False
+
+    def __repr__(self):
+        repr_str = 'suites = {}\ncategories = {}\nis_excluded = {}\npriority = {}\nproduct = {}\nskip_shared = {}'.format(
+            self._suites,
+            self._categories,
+            self._is_category_excluded,
+            self._priority,
+            self._product,
+            self._skip_shared
+        )
+        return repr_str
+
+    @staticmethod
+    def _args_to_tuple(param):
+        if isinstance(param, str):
+            return param,
+        elif isinstance(param, list):
+            return tuple(param)
+        else:
+            assert isinstance(param, type(None))
+            return ()
+
+    def get_suites(self):
+        return self._suites
+
+    def get_categories(self):
+        return self._categories
+
+    @property
+    def is_excluded(self):
+        return self._is_category_excluded
+
+    def get_priority(self):
+        return self._priority
+
+    def get_product(self):
+        if self._product:
+            return ProductTag(self._product)
+        else:
+            return None
+
+    def is_shared_skipped(self):
+        return self._skip_shared
+
+
+class CommandLineConfiguration(BaseConfiguration):
+    """Configuration based on command line parameter parsing
+    """
+
+    def __init__(self):
+        super().__init__()
+
         self._parser = None
         self._args = None
-        self._categories = []
-        self._priorities = []
-
         self._configure_parser()
+        self._parse()
 
     def _configure_parser(self):
         if self._parser is not None:
@@ -24,18 +86,25 @@ class SuiteConfig:
                                   nargs='+',
                                   help='Suite(s) to execute')
         self._parser.add_argument('--priority',
-                                  metavar='PriorityTag',
+                                  default=-1,
+                                  metavar='PriorityID',
                                   type=int,
-                                  nargs='+',
-                                  help='Priority of test cases to execute')
-        self._parser.add_argument('--category',
-                                  metavar='CategoryTag',
-                                  nargs='+',
-                                  help='Additional filter(s) for test cases')
+                                  help='Lowest priority of test cases to execute (inclusive)')
+
+        category = self._parser.add_mutually_exclusive_group()
+        category.add_argument('--include',
+                              metavar='category',
+                              nargs='+',
+                              help='Filter(s) for test case categories to include for execution')
+        category.add_argument('--exclude',
+                              metavar='category',
+                              nargs='+',
+                              help='Filter(s) for test case categories to exclude from execution')
+
         self._parser.add_argument('--product',
                                   type=str,
                                   choices=['ACE', 'BME', 'STL'],
-                                  help='Define the product to test')
+                                  help='Filter specific product to test')
         self._parser.add_argument('--skip-shared',
                                   action='store_true',
                                   help='Skips shared functionality tests')
@@ -47,38 +116,17 @@ class SuiteConfig:
                                   help='Extract the required meta information from the test collection'
                                   )
 
-    def _check_parse_state(self):
-        if self._args is None:
-            raise ValueError("Commandline arguments have not been initialized correctly")
-
-    def _nargs_to_readonly_container(self, input):
-        if isinstance(input, str):
-            return input,
-        elif isinstance(input, list):
-            return tuple(input)
-        else:
-            assert isinstance(input, type(None))
-            return None
-
-    def parse(self):
+    def _parse(self):
         self._args = self._parser.parse_args()
 
-    def get_suites(self):
-        self._check_parse_state()
-        return self._nargs_to_readonly_container(self._args.suite)
+        self._suites = self._args_to_tuple(self._args.suite)
+        self._priority = self._args.priority
+        self._product = self._args.product
+        self._skip_shared = self._args.skip_shared
 
-    def get_categories(self):
-        self._check_parse_state()
-        return self._nargs_to_readonly_container(self._args.category)
-
-    def get_priorities(self):
-        self._check_parse_state()
-        return self._nargs_to_readonly_container(self._args.priority)
-
-    def get_product(self):
-        self._check_parse_state()
-        return self._args.product
-
-    def is_shared_skipped(self):
-        self._check_parse_state()
-        return self._args.skip_shared
+        if self._args.exclude:
+            self._categories = self._args_to_tuple(self._args.exclude)
+            self._is_category_excluded = True
+        else:
+            self._categories = self._args_to_tuple(self._args.include)
+            self._is_category_excluded = False
