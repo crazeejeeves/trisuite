@@ -19,7 +19,7 @@ class SuiteController:
             suite = unittest.TestLoader().discover(source, pattern='test_*.py')
             self._suites.append(suite)
             # TODO: Remove this after testing
-            # break
+            break
 
     def get_suites(self):
         for suite in self._suites:
