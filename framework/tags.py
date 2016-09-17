@@ -6,7 +6,7 @@ class MetaTag:
     """
     def __init__(self):
         self.product = None
-        self.priority = None
+        self.priority = -1
         self.categories = set()
 
 
@@ -18,7 +18,7 @@ class ProductTag(Enum):
     STL = 'STL'
 
 
-def tag(*categories: str, product: ProductTag=None, priority: int=None):
+def tag(*categories: str, product: ProductTag=None, priority: int=-1):
     """Specify a configuration tag for organizing test cases
 
     :param categories: Arbitrary list of category names

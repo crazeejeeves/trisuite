@@ -1,5 +1,6 @@
 import argparse
 import logging
+
 from framework.tags import ProductTag
 
 
@@ -10,10 +11,14 @@ class BaseConfiguration:
     Note to inheritors: Ensure the data types are respected when assigning the values to the
     internal variables
     """
+
+    SUITE_FOLDER_SUFFIX = '_tests'
+    TESTCASE_PATTERN = 'test_*.py'
+
     def __init__(self):
         self._logger = logging.getLogger(__name__)
-        self._suites = ()
-        self._categories = ()
+        self._suites = set()
+        self._categories = set()
         self._is_category_excluded = True
         self._priority = -1
         self._product = None
@@ -39,6 +44,16 @@ class BaseConfiguration:
         else:
             assert isinstance(param, type(None))
             return ()
+
+    @staticmethod
+    def _args_to_set(param):
+        if isinstance(param, str):
+            return set([param])
+        elif isinstance(param, list):
+            return set(param)
+        else:
+            assert isinstance(param, type(None))
+            return set()
 
     def get_suites(self):
         return self._suites
@@ -85,6 +100,13 @@ class CommandLineConfiguration(BaseConfiguration):
                                   metavar='SuiteName',
                                   nargs='+',
                                   help='Suite(s) to execute')
+        self._parser.add_argument('--product',
+                                  type=str,
+                                  choices=['ACE', 'BME', 'STL'],
+                                  help='Filter specific product to test')
+        self._parser.add_argument('--skip-shared',
+                                  action='store_true',
+                                  help='Skips shared functionality tests')
         self._parser.add_argument('--priority',
                                   default=-1,
                                   metavar='PriorityID',
@@ -101,32 +123,24 @@ class CommandLineConfiguration(BaseConfiguration):
                               nargs='+',
                               help='Filter(s) for test case categories to exclude from execution')
 
-        self._parser.add_argument('--product',
-                                  type=str,
-                                  choices=['ACE', 'BME', 'STL'],
-                                  help='Filter specific product to test')
-        self._parser.add_argument('--skip-shared',
-                                  action='store_true',
-                                  help='Skips shared functionality tests')
-
         self._parser.add_argument('--query',
                                   type=str,
                                   choices=['suite', 'priority', 'category'],
                                   default='suite',
-                                  help='Extract the required meta information from the test collection'
+                                  help='Extract the required meta information from the test collection. NOTIMPLEMENTED'
                                   )
 
     def _parse(self):
         self._args = self._parser.parse_args()
 
-        self._suites = self._args_to_tuple(self._args.suite)
+        self._suites = self._args_to_set(self._args.suite)
         self._priority = self._args.priority
         self._product = self._args.product
         self._skip_shared = self._args.skip_shared
 
         if self._args.exclude:
-            self._categories = self._args_to_tuple(self._args.exclude)
+            self._categories = self._args_to_set(self._args.exclude)
             self._is_category_excluded = True
         else:
-            self._categories = self._args_to_tuple(self._args.include)
+            self._categories = self._args_to_set(self._args.include)
             self._is_category_excluded = False

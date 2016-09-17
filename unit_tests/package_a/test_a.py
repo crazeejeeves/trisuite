@@ -9,7 +9,7 @@ class TestUnitA(TestCase):
     def test_one_param(self):
         self.assertRaises(TypeError, lambda: add(1))
 
-    @tag("Nightly")
+    @tag("Nightly", priority=10)
     def test_two_params(self):
         self.assertEquals(3, add(1, 2), "Add result did not produce 3")
 
