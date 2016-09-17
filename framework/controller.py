@@ -1,3 +1,4 @@
+import logging
 import os
 import unittest
 
@@ -7,6 +8,7 @@ from framework.suite import FilterableTestSuite
 class SuiteController:
 
     def __init__(self):
+        self._logger = logging.getLogger(__name__)
         self._suites = []
         self._build_suites()
 

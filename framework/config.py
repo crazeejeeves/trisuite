@@ -1,9 +1,11 @@
 import argparse
+import logging
 
 
 class SuiteConfig:
 
     def __init__(self):
+        self._logger = logging.getLogger(__name__)
         self._parser = None
         self._args = None
         self._categories = []

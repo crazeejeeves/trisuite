@@ -1,3 +1,4 @@
+import logging
 import unittest
 
 from framework.tags import ProductTag
@@ -23,6 +24,7 @@ class FilterableTestSuite(unittest.TestSuite):
     """
 
     def __init__(self, tests=()):
+        self._logger = logging.getLogger(__name__)
         super().__init__(tests)
 
     def addTest(self, test):
@@ -36,10 +38,7 @@ class FilterableTestSuite(unittest.TestSuite):
                 if tags is not None:
                     # TEST - Abort insertion of test case
                     if tags.product == ProductTag.BME:
-                        print(type(method))
                         setattr(test, method_name, _mark_with_skip(method, "Implicitly disabled"))
-
-                        print(method.__name__) #, tags.product, tags.categories)
 
         super().addTest(test)
 
