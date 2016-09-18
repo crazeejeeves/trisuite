@@ -27,7 +27,7 @@ class BaseConfiguration:
     def __repr__(self):
         repr_str = 'suites = {}\ncategories = {}\nis_excluded = {}\npriority = {}\nproduct = {}\nskip_shared = {}'.format(
             self._suites,
-            self._categories,
+            (len(self._categories) > 0) and self._categories or 'unspecified',
             self._is_category_excluded,
             self._priority,
             self._product,

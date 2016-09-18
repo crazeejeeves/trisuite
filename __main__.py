@@ -11,6 +11,8 @@ config = Configuration()
 filters = FilterSystem(config)
 
 controller = TestController(config, filters)
+controller.setup()
+
 for suite in controller.get_suites():
     unittest.TextTestRunner(verbosity=2).run(suite)
 
