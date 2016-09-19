@@ -11,9 +11,6 @@ class TestController:
     """Controls top-level suite processing and filtering
     """
 
-    _SUITE_FOLDER_SUFFIX = '_tests'
-    _TESTCASE_PATTERN = 'test_*.py'
-
     def __init__(self, config: BaseConfiguration, filters: FilterSystem):
         self._logger = logging.getLogger(__name__)
 
@@ -30,9 +27,11 @@ class TestController:
         self._logger.info('Found {} candidate test folders'.format(len(data_sources)))
 
         names = [name for name, folder in data_sources]
+        differences = requested_suites.difference(names)
         self._logger.debug('Suite(s) requested: ' + str(requested_suites))
         self._logger.debug('Folder(s) found: ' + str(names))
-        self._logger.warn('Requested suite(s) not found: {}'.format(requested_suites.difference(names)))
+        if len(differences) > 0:
+            self._logger.warn('Requested suite(s) not found: {}'.format(differences))
 
         # Inject test loader to use our custom suite class that processes the tags
         # The suite instances are created by the loader and prevents us from injecting
@@ -43,7 +42,7 @@ class TestController:
         for name, folder in data_sources:
             if name in requested_suites:
                 self._logger.info('Suite "{}" loading from "{}"...'.format(name, folder))
-                suite = unittest.TestLoader().discover(folder, pattern=self._config.TESTCASE_PATTERN)
+                suite = unittest.TestLoader().discover(start_dir=folder, pattern=self._config.TESTCASE_PATTERN)
                 self._suites.append(suite)
                 self._logger.info('Suite "{}" loaded with {} test(s)!'.format(name, suite.countTestCases()))
                 continue
