@@ -100,6 +100,7 @@ class CommandLineConfiguration(BaseConfiguration):
         except AttributeError as e:
             self._logger.exception('Failed to parse command-line arguments')
             self._logger.warn('Using default parameters (unit test only)')
+            self._suites = set(['unit'])
             return False
             
         self._parser.add_argument('--suite',
@@ -136,6 +137,7 @@ class CommandLineConfiguration(BaseConfiguration):
                                   default='suite',
                                   help='Extract the required meta information from the test collection. NOTIMPLEMENTED'
                                   )
+        return True
 
     def _parse(self):
         self._logger.info('Parsing command-line arguments...')
