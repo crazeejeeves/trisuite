@@ -103,35 +103,35 @@ class CommandLineConfiguration(BaseConfiguration):
             self._suites = set(['unit'])
             return False
             
-        self._parser.add_argument('--suite',
+        self._parser.add_argument('-suite',
                                   default='unit',
                                   metavar='SuiteName',
                                   nargs='+',
                                   help='Suite(s) to execute')
-        self._parser.add_argument('--product',
+        self._parser.add_argument('-product',
                                   type=str,
                                   choices=['ACE', 'BME', 'STL'],
                                   help='Filter specific product to test')
-        self._parser.add_argument('--skip-shared',
+        self._parser.add_argument('-skip-shared',
                                   action='store_true',
                                   help='Skips shared functionality tests')
-        self._parser.add_argument('--priority',
+        self._parser.add_argument('-priority',
                                   default=-1,
                                   metavar='PriorityID',
                                   type=int,
                                   help='Lowest priority of test cases to execute (inclusive)')
 
         category = self._parser.add_mutually_exclusive_group()
-        category.add_argument('--include',
+        category.add_argument('-include',
                               metavar='category',
                               nargs='+',
                               help='Filter(s) for test case categories to include for execution')
-        category.add_argument('--exclude',
+        category.add_argument('-exclude',
                               metavar='category',
                               nargs='+',
                               help='Filter(s) for test case categories to exclude from execution')
 
-        self._parser.add_argument('--query',
+        self._parser.add_argument('-query',
                                   type=str,
                                   choices=['suite', 'priority', 'category'],
                                   default='suite',
