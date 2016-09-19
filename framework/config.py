@@ -87,14 +87,21 @@ class CommandLineConfiguration(BaseConfiguration):
 
         self._parser = None
         self._args = None
-        self._configure_parser()
-        self._parse()
+
+        if self._configure_parser():
+            self._parse()
 
     def _configure_parser(self):
         if self._parser is not None:
             return
 
-        self._parser = argparse.ArgumentParser(epilog='Note: --query overrides all other flags and returns without executing tests')
+        try:
+            self._parser = argparse.ArgumentParser(epilog='Note: --query overrides all other flags and returns without executing tests')
+        except AttributeError as e:
+            self._logger.exception('Failed to parse command-line arguments')
+            self._logger.warn('Using default parameters (unit test only)')
+            return False
+            
         self._parser.add_argument('--suite',
                                   default='unit',
                                   metavar='SuiteName',
