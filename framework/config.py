@@ -142,7 +142,11 @@ class CommandLineConfiguration(BaseConfiguration):
     def _parse(self):
         self._logger.info('Parsing command-line arguments...')
 
-        self._args = self._parser.parse_args()
+        try:
+            self._args = self._parser.parse_args()
+        except:
+            self._logger.exception("Error parsing command-line arguments. Using default settings")
+            return
 
         self._suites = self._args_to_set(self._args.suite)
         self._priority = self._args.priority
